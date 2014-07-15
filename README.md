@@ -1,4 +1,4 @@
-avitojpeg
+MJPEGDecoder
 =========
 Application decodes pure MJPEG bitstream to AVI file
 
