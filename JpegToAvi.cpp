@@ -1,4 +1,6 @@
 #include "JpegToAvi.h"
+#include <string.h>
+#include <sstream>
 
 #define DEFAULT_FRAME_WIDTH 360
 #define DEFAULT_FRAME_HEIGHT 240
@@ -102,25 +104,19 @@ MyList *JPEGToAVI::GetFrameList(int numberOfFrames, char* jpegFilesExtension)
 	  ret->prev = 0;
 	  ret->next = 0;
 
-	  char* tmpFileName = new char();
-	  for (i = 1; i <= numberOfFrames; i++) {
-		char temporary[0];
-		sprintf(temporary,"%d",i);
-		strcpy(tmpFileName,temporary);
-		strcat(tmpFileName,".");
-		strcat(tmpFileName,jpegFilesExtension);
-		//cout << "JpegFile: " << tmpFileName << endl;
+    for (i = 1; i <= numberOfFrames; i++) {
+      stringstream tmpFileName;
+      tmpFileName << i << "." << jpegFilesExtension; 
+      cout << "JpegFile: " << tmpFileName.str() << endl;
 
-	    tmp = (JPEGData *) malloc(strlen(tmpFileName) + 1 + JPEG_DATA_SZ);
-	    strcpy(tmp->name, tmpFileName);
-	    if (myList->data == 0){
-	    	myList->data = tmp;
-	    } else {
-	    	myList = list_push_back(myList, tmp);
-	    }
-	  }
-	  delete tmpFileName;
-	  tmpFileName = NULL;
+      tmp = (JPEGData *) malloc(strlen(tmpFileName.str().c_str()) + 1 + JPEG_DATA_SZ);
+      strcpy(tmp->name, tmpFileName.str().c_str());
+      if (myList->data == 0){
+        myList->data = tmp;
+      } else {
+        myList = list_push_back(myList, tmp);
+      }
+    }
 
 	  return ret;
 }
@@ -177,7 +173,8 @@ int JPEGToAVI::CreateMJPEGAviFromJPGs(char* outputAviFile, int numberOfFrames, c
 
   FILE * fileToWrite;
   fileToWrite = fopen ( outputAviFile , "wb" );
-  //cout << "File to write..."<< outputAviFile << endl;
+  cout << "File to write..."<< outputAviFile << endl;
+
 
   perMicrosecond = 1000000 / framesPerSecond;
 
@@ -267,8 +264,11 @@ int JPEGToAVI::CreateMJPEGAviFromJPGs(char* outputAviFile, int numberOfFrames, c
 
    //==================================================================================================
 
+  cout << "Getting frames - it may take few minutes. Please wait ... " << endl;
   framesNumberList = GetFrameList(numberOfFrames, jpegFilesExtension);
+  cout << "Getting frames - DONE " << endl;
   framesNumber = list_size(framesNumberList);
+  cout << "Frames number: " << framesNumber << endl;
 
   /* getting image, and hence, riff sizes */
   jpegSize64 = GetFramesSizes(framesNumberList);
